@@ -11,11 +11,19 @@ public class Dropper : MonoBehaviour
     public float hover_buffer = 0.5f;
     private Vector3 hover_position;
 
+    private Scoreboard scoreScript;
+
+    public float cooldown = 1f;
+    private float _cooldown;
+    private bool _onCooldown;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _cam = Camera.main;
+        scoreScript = GetComponent<Scoreboard>();
         hover_position = new Vector3(0f, hover_level, 0f);
+        _cooldown = cooldown;
     }
 
     // Update is called once per frame
@@ -28,8 +36,19 @@ public class Dropper : MonoBehaviour
         var mouseClicked = Input.GetMouseButtonDown(0);
         if (mouseClicked)
         {
-            Instantiate(GetRandomDrop(), hover_position, Quaternion.identity);
+            if (!_onCooldown) {
+                SpawnCandy();
+            }
         }
+        if (_onCooldown) {
+            if (_cooldown <= 0) {
+                _cooldown = cooldown;
+                _onCooldown = false;
+            } else {
+                _cooldown -= Time.deltaTime;
+            }
+        }
+    
     }
 
     void UpdateHoverPos()
@@ -55,4 +74,9 @@ public class Dropper : MonoBehaviour
         return droppables[i];
     }
    
+    void SpawnCandy() {
+        Instantiate(GetRandomDrop(), hover_position, Quaternion.identity);
+        scoreScript.IncreamentScore();
+        _onCooldown = true;
+    }
 }
